@@ -2,8 +2,6 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let video;
 
-// const emotion_classes = { 0: 'Angry', 1: 'Fear', 2: 'Happy', 3: 'Neutral', 4: 'Sad', 5: 'Surprise' };
-
 async function setupCamera() {
     video = document.createElement('video')
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -22,8 +20,8 @@ async function loadModels() {
     const faceModel = await blazeface.load({ inputSize: 128, doubleScoreThreshold: 0.5 });
     // const emotionModel = await tf.loadLayersModel('http://localhost:8000/emotion/model.json');
     // const agemodel = await tf.loadLayersModel('http://localhost:8000/age_models/model.json')
-    const agemodel = await tf.loadLayersModel('http://localhost:8000/age/model.json', { inputShape: [1, 180, 180, 1] });
-    const gendermodel = await tf.loadLayersModel('http://localhost:8000/gender/model.json', { inputShape: [1, 180, 180, 1] });
+    const agemodel = await tf.loadLayersModel('/age/model.json', { inputShape: [1, 180, 180, 1] });
+    const gendermodel = await tf.loadLayersModel('/gender/model.json', { inputShape: [1, 180, 180, 1] });
     return { faceModel, agemodel, gendermodel };
 }
 

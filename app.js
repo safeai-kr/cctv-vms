@@ -20,8 +20,8 @@ async function loadModels() {
     const faceModel = await blazeface.load({ inputSize: 128, doubleScoreThreshold: 0.5 });
     // const emotionModel = await tf.loadLayersModel('http://localhost:8000/emotion/model.json');
     // const agemodel = await tf.loadLayersModel('http://localhost:8000/age_models/model.json')
-    const agemodel = await tf.loadLayersModel("age/model.json", { inputShape: [1, 180, 180, 1] });
-    const gendermodel = await tf.loadLayersModel("gender/model.json", { inputShape: [1, 180, 180, 1] });
+    const agemodel = await tf.loadLayersModel("https://safeai-kr/cctv-vms/age/model.json", { inputShape: [1, 180, 180, 1] });
+    const gendermodel = await tf.loadLayersModel("https://safeai-kr/cctv-vms/gender/model.json", { inputShape: [1, 180, 180, 1] });
     return { faceModel, agemodel, gendermodel };
 }
 

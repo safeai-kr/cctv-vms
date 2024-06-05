@@ -20,8 +20,8 @@ async function loadModels() {
     const faceModel = await blazeface.load({ inputSize: 128, doubleScoreThreshold: 0.5 });
     // const emotionModel = await tf.loadLayersModel('http://localhost:8000/emotion/model.json');
     // const agemodel = await tf.loadLayersModel('http://localhost:8000/age_models/model.json')
-    const agemodel = await tf.loadLayersModel("age/model.json", { inputShape: [1, 180, 180, 1] });
-    const gendermodel = await tf.loadLayersModel("gender/model.json", { inputShape: [1, 180, 180, 1] });
+    const agemodel = await tf.loadLayersModel('age/model.json', { inputShape: [1, 180, 180, 1] });
+    const gendermodel = await tf.loadLayersModel('gender/model.json');
     return { faceModel, agemodel, gendermodel };
 }
 
@@ -39,14 +39,12 @@ function getAgeLabel(index) {
 
 async function detect({ faceModel, agemodel, gendermodel }) {
     const predictions = await faceModel.estimateFaces(video, false);
-
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < predictions.length; i++) {
         const start = predictions[i].topLeft;
         const end = predictions[i].bottomRight;
         const size = [end[0] - start[0], end[1] - start[1]];
-
         const intstart = [Math.round(start[0]), Math.round(start[1])];
         // const intsize = [Math.round(size[0]), Math.round(size[1])];
         const intsize = [
@@ -54,6 +52,10 @@ async function detect({ faceModel, agemodel, gendermodel }) {
             Math.min(Math.round(size[1]), canvas.height - intstart[1])
         ];
 
+        if (intsize[0] < 0)
+            intsize[0] *= -1
+        if (intsize[1] < 0)
+            intsize[1] *= -1
 
         ctx.beginPath();
         ctx.rect(intstart[0], intstart[1], intsize[0], intsize[1]);
@@ -78,10 +80,10 @@ async function detect({ faceModel, agemodel, gendermodel }) {
         //     .expandDims(0);
 
         const agepred = await agemodel.predict(faceAgeGender);
-        // console.log("age: ", agepred.dataSync())
+        console.log("age: ", agepred.dataSync())
 
         const genderpred = await gendermodel.predict(faceAgeGender);
-        // console.log("gen: ", genderpred.dataSync())
+        console.log("gen: ", genderpred.dataSync())
 
         const ageArray = agepred.dataSync();
         const maxAgeIndex = ageArray.indexOf(Math.max(...ageArray));
@@ -93,6 +95,10 @@ async function detect({ faceModel, agemodel, gendermodel }) {
         const label = `${genderLabel}, ${predictedAge}`;
 
         drawLabel(ctx, intstart[0], intstart[1], label);
+
+        faceAgeGender.dispose();
+        agepred.dispose();
+        genderpred.dispose();
     }
 
     requestAnimationFrame(() => detect({ faceModel, agemodel, gendermodel }));
@@ -100,8 +106,12 @@ async function detect({ faceModel, agemodel, gendermodel }) {
 
 (async function main() {
     await setupCamera();
+    console.log("video start")
     video.play();
+    console.log("video end")
 
     const models = await loadModels();
+    console.log("detect start")
     detect(models);
+    console.log("detect end")
 })();
